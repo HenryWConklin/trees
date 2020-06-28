@@ -1,30 +1,26 @@
 <script>
-	export let name;
+    import Tree from './Tree.svelte'
+    import DisplaySlider from './DisplaySlider.svelte'
+    let ang1 = -45;
+    let ang2 = 45;
+    let scale1 = 0.6;
+    let scale2 = 0.6;
 </script>
-
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-</main>
-
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
+    .slider-container {
+        display: flex;
+        margin: 2em;
+    }
 </style>
+
+
+<Tree {ang1} {ang2} {scale1} {scale2} />
+<div class="slider-container">
+    <DisplaySlider label="Angle 1" bind:value={ang1} min="-180" max="180" step="5"/>
+    <DisplaySlider label="Scale 1" bind:value={scale1} min="0" max="0.9" step="0.02"/>
+</div>
+
+<div class="slider-container">
+    <DisplaySlider label="Angle 2" bind:value={ang2} min="-180" max="180" step="5"/>
+    <DisplaySlider label="Scale 2" bind:value={scale2} min="0" max="0.9" step="0.02"/>
+</div>
