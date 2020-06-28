@@ -17,10 +17,16 @@
     .display {
         width: 5em;
     }
+    .container {
+        display: flex;
+        flex-grow: 1;
+    }
 </style>
 
+<span class="container">
 <label for="slider">{label}</label>
 <div class="inner-container">
     <input id="slider" class="slider" type="range" bind:value={value} min="{min}" max="{max}" step="{step}"/>
     <input id="display" class="display" type="number" bind:value={value} min="{min}" max="{max}" step="{step}" />
 </div>
+</span>

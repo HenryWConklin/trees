@@ -9,6 +9,7 @@
 <style>
     .slider-container {
         display: flex;
+        flex-wrap: wrap;
         margin: 2em;
     }
 </style>
