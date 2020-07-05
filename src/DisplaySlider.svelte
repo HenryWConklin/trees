@@ -7,7 +7,7 @@
 </script>
 <style>
     .inner-container {
-        margin: 0 2em 0 1em;
+        margin: 0;
         flex-grow: 1;
         display: flex;
     }
@@ -24,9 +24,9 @@
 </style>
 
 <span class="container">
-<label for="slider">{label}</label>
-<div class="inner-container">
-    <input id="slider" class="slider" type="range" bind:value={value} min="{min}" max="{max}" step="{step}"/>
-    <input id="display" class="display" type="number" bind:value={value} min="{min}" max="{max}" step="{step}" />
-</div>
+    <fieldset class="inner-container">
+        <legend>{label}</legend>
+        <input class="slider" aria-label="{label} slider" type="range" bind:value={value} min="{min}" max="{max}" step="{step}"/>
+        <input class="display" aria-label="{label} display" type="number" bind:value={value} min="{min}" max="{max}" step="{step}" />
+    </fieldset>
 </span>
