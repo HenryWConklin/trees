@@ -26,9 +26,9 @@
         latestRender = renderInd;
 
         // Wait for critical section (rendering) to be free
-        while (renderRunning != 0) await new Promise(r => setTimeout(r, 0));
+        while (renderRunning !== 0) await new Promise(r => setTimeout(r, 0));
         // If another render started while waiting, exit
-        if (renderInd != latestRender) return;
+        if (renderInd !== latestRender) return;
         // Claim the critical section
         renderRunning = renderInd;
 
@@ -104,7 +104,7 @@
             if (i > 5) {
                 // Check if this thread needs to exit
                 // If a new render task has been started, exit
-                if (latestRender != renderInd) {
+                if (latestRender !== renderInd) {
                     break;
                 }
 
@@ -130,5 +130,5 @@
 
 <svelte:window on:resize={redraw} />
 
-<canvas bind:this={canvas}  />
+<canvas bind:this={canvas} ></canvas>
 

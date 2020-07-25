@@ -1,5 +1,4 @@
 <script>
-    import Tree from './Tree.svelte'
     import DisplaySlider from './DisplaySlider.svelte'
     import CanvasTree from './CanvasTree.svelte'
     export let name;
@@ -17,8 +16,7 @@
     .slider-container {
         display: flex;
         flex-wrap: wrap;
-        padding: 1em;
-        padding-top: 0;
+        padding: 0 1em 1em;
     }
     .container {
         height: 100%;

@@ -9,7 +9,7 @@
     const height = 25;
     const color = "#443211"
 </script>
-<use xlink:href="#branch" />
+<use xlink:href="#branch"></use>
 {#if depth < maxDepth }
 <g transform="translate(0, {-height}) scale({scale1},{scale1}) rotate({ang1})">
     <svelte:self {ang1} {ang2} {scale1} {scale2} depth={depth+1} />
