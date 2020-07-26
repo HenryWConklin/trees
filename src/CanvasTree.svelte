@@ -127,7 +127,6 @@
 
         ctx.strokeStyle = 'rgb(0,0,0)';
         ctx.lineWidth = rootWidth;
-        ctx.imageSmoothingQuality = "high";
 
         let totalScale = 2;
 

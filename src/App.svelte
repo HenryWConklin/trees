@@ -8,10 +8,9 @@
     let scale2 = 0.6;
 </script>
 <style>
-    :global(body) {
+    :global(body) :global(html){
         margin: 0;
         padding: 0;
-        overflow-y: hidden;
     }
     .slider-container {
         display: flex;
