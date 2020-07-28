@@ -23,7 +23,7 @@
         // otherwise
         ctx.scale(-1, 1)
         ctx.translate(x, y);
-        ctx.rotate(Math.PI + (angle * Math.PI / 180));
+        ctx.rotate(Math.PI - (angle * Math.PI / 180));
         ctx.scale(scale, scale);
         ctx.drawImage(img, -img.width / 2, rootMargin * img.height, img.width, -img.height);
         ctx.restore();
@@ -102,148 +102,150 @@
         // If another render started while waiting, exit
         if (renderInd !== latestRender) return;
         // Claim the critical section
-        renderRunning = renderInd;
+        try {
+            renderRunning = renderInd;
 
-        // Zero out the width/height to let the parent flexbox recalculate height properly
-        // Otherwise the canvas just grows indefinitely on resize, doesn't shrink properly
-        // It's mega-weird
-        canvas.width = 0;
-        canvas.height = 0;
+            // Zero out the width/height to let the parent flexbox recalculate height properly
+            // Otherwise the canvas just grows indefinitely on resize, doesn't shrink properly
+            // It's mega-weird
+            canvas.width = 0;
+            canvas.height = 0;
 
-        // Set canvas resolution to its display resolution
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+            // Set canvas resolution to its display resolution
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
 
-        const width = canvas.width;
-        const height = canvas.height;
+            const width = canvas.width;
+            const height = canvas.height;
 
-        const originX = width / 2
-        const originY = (1 - rootMargin) * height
+            const originX = width / 2
+            const originY = (1 - rootMargin) * height
 
-        const rootBuffer = rootWidth * Math.max(scale1, scale2) / 2
+            const rootBuffer = rootWidth * Math.max(scale1, scale2) / 2
 
-        let ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, width, height);
-
-        ctx.strokeStyle = 'rgb(0,0,0)';
-        ctx.lineWidth = rootWidth;
-
-        let totalScale = 2;
-
-        ctx.save();
-        ctx.scale(1, -1);
-        ctx.translate(originX, -originY);
-
-        ctx.save()
-        ctx.scale(totalScale, totalScale);
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(0, rootHeight * height + rootBuffer);
-        ctx.stroke();
-        ctx.restore();
-
-        let back_canvas = document.createElement('canvas');
-        back_canvas.width = width;
-        back_canvas.height = height;
-        let back_ctx = back_canvas.getContext("2d");
-
-        // Starter bbox for non-zero pixels in pixel-space (not transformed space)
-        let orig_bbox = {
-            minX: 0,
-            maxX: width,
-            minY: 0,
-            maxY: height
-        }
-        let bbox = orig_bbox;
-
-        for (let i = 0; i < 100; i++) {
-            // Save the current tree to another canvas
-            back_ctx.clearRect(0, 0, width, height)
-            back_ctx.drawImage(canvas, 0, 0);
-
-            // Calculate a bounding box for this next iteration so we can scale things to keep the tree from clipping
-            // off the edge of the canvas
-            bbox = refine_canvas_bounding_box(canvas, ctx, bbox);
-            // Get the base transform, the totalScale factor is technically part of it but is handled in a weird
-            // way because of how it affects the children's rendering
-            const base_transform = ctx.getTransform().scale(totalScale, totalScale)
-            // Apply the transform applied to each of the children to the base transform, then map back to pixel
-            // space by using the inverse of the base transform
-            const child1_transform = base_transform
-                    .translate(0, rootHeight * height)
-                    // This interface uses degrees and not radians for some reason, also negated for some reason
-                    .rotate(-ang1)
-                    .scale(scale1, scale1)
-                    .multiply(base_transform.inverse())
-            const child2_transform = base_transform
-                    .translate(0, rootHeight * height)
-                    .rotate(-ang2)
-                    .scale(scale2, scale2)
-                    .multiply(base_transform.inverse())
-            // Find a reasonable bounding box for the next iteration by combining the current box with the transformed
-            // boxes of each of the children
-            const child1_bbox = transform_bbox(bbox, child1_transform)
-            const child2_bbox = transform_bbox(bbox, child2_transform)
-            bbox = bbox_union(bbox, bbox_union(child1_bbox, child2_bbox));
-
-            // Reset the transformation before clearing because finding the boundaries is hard
-            // Clear the main canvas so we're not drawing things on top of each other
-            ctx.save();
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            let ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, width, height);
-            ctx.restore();
 
-            // Find the appropriate scale factor to put each edge of the tree at 10px away from the border
-            const leftScale = (originX - 10) / (bbox.maxX - originX);
-            const rightScale = (width - originX - 10) / (originX - bbox.minX);
-            const topScale = (originY - 10) / (originY - bbox.minY);
-            let bottomScale = (height - originY - 10) / (bbox.maxY - originY)
+            ctx.strokeStyle = 'rgb(0,0,0)';
+            ctx.lineWidth = rootWidth;
 
-            // Bottom of the root is above/on the on the origin which gives a negative/infinite scale for the first
-            // iteration at least. Replace this with a large number to ignore it
-            if (bottomScale < 0) bottomScale = 1e100;
+            let totalScale = 2;
 
-            // Only take scale factors below 1 (i.e. don't grow the tree) because that breaks thing like
-            // refine_bounding_box (use a larger initial tree instead), and take the smallest scale factor which
-            // indicates biggest change needed to keep the tree inside the canvas
-            let scaleIncrement = Math.min(leftScale, rightScale, topScale, bottomScale, 1);
+            ctx.save();
+            ctx.scale(1, -1);
+            ctx.translate(originX, -originY);
 
-            // Draw the root
             ctx.save()
-            ctx.scale(totalScale * scaleIncrement, totalScale * scaleIncrement);
+            ctx.scale(totalScale, totalScale);
             ctx.beginPath();
             ctx.moveTo(0, 0);
             ctx.lineTo(0, rootHeight * height + rootBuffer);
             ctx.stroke();
-            ctx.restore()
+            ctx.restore();
 
-            // Children need to only scale by the difference in scale from the previous iteration
-            // Scaling by the full scale value causes the scaling to compound each iteration
-            ctx.save();
-            ctx.scale(scaleIncrement, scaleIncrement);
+            let back_canvas = document.createElement('canvas');
+            back_canvas.width = width;
+            back_canvas.height = height;
+            let back_ctx = back_canvas.getContext("2d");
 
-            // Draw first child (change the position the image is drawn to match the full scale factor, even though
-            // the children themselves are only scaled by the increment)
-            draw_tranformed_image(ctx, back_canvas, 0, rootHeight * height * totalScale, ang1, scale1)
-            // Draw second child
-            draw_tranformed_image(ctx, back_canvas, 0, rootHeight * height * totalScale, ang2, scale2)
-            ctx.restore()
+            // Starter bbox for non-zero pixels in pixel-space (not transformed space)
+            let bbox = {
+                minX: 0,
+                maxX: width,
+                minY: 0,
+                maxY: height
+            };
 
-            totalScale *= scaleIncrement;
+            for (let i = 0; i < 100; i++) {
+                // Save the current tree to another canvas
+                back_ctx.clearRect(0, 0, width, height)
+                back_ctx.drawImage(canvas, 0, 0);
 
-            // Set a timeout to free some cycles for the main thread, but let a few iterations finish first so things look smooth
-            if (i > 5) {
-                await new Promise(r => setTimeout(r, 20));
+                // Calculate a bounding box for this next iteration so we can scale things to keep the tree from clipping
+                // off the edge of the canvas
+                bbox = refine_canvas_bounding_box(canvas, ctx, bbox);
+                // Get the base transform, the totalScale factor is technically part of it but is handled in a weird
+                // way because of how it affects the children's rendering
+                const base_transform = ctx.getTransform().scale(totalScale, totalScale)
+                // Apply the transform applied to each of the children to the base transform, then map back to pixel
+                // space by using the inverse of the base transform
+                const child1_transform = base_transform
+                        .translate(0, rootHeight * height)
+                        // This interface uses degrees and not radians for some reason, also negated for some reason
+                        .rotate(ang1)
+                        .scale(scale1, scale1)
+                        .multiply(base_transform.inverse())
+                const child2_transform = base_transform
+                        .translate(0, rootHeight * height)
+                        .rotate(ang2)
+                        .scale(scale2, scale2)
+                        .multiply(base_transform.inverse())
+                // Find a reasonable bounding box for the next iteration by combining the current box with the transformed
+                // boxes of each of the children
+                const child1_bbox = transform_bbox(bbox, child1_transform)
+                const child2_bbox = transform_bbox(bbox, child2_transform)
+                bbox = bbox_union(bbox, bbox_union(child1_bbox, child2_bbox));
 
-                // Check if this thread needs to exit
-                // If a new render task has been started, exit
-                if (latestRender !== renderInd) {
-                    break;
+                // Reset the transformation before clearing because finding the boundaries is hard
+                // Clear the main canvas so we're not drawing things on top of each other
+                ctx.save();
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(0, 0, width, height);
+                ctx.restore();
+
+                // Find the appropriate scale factor to put each edge of the tree at 10px away from the border
+                const leftScale = (originX - 10) / (bbox.maxX - originX);
+                const rightScale = (width - originX - 10) / (originX - bbox.minX);
+                const topScale = (originY - 10) / (originY - bbox.minY);
+                let bottomScale = (height - originY - 10) / (bbox.maxY - originY)
+
+                // Bottom of the root is above/on the on the origin which gives a negative/infinite scale for the first
+                // iteration at least. Replace this with a large number to ignore it
+                if (bottomScale < 0) bottomScale = 1e100;
+
+                // Only take scale factors below 1 (i.e. don't grow the tree) because that breaks thing like
+                // refine_bounding_box (use a larger initial tree instead), and take the smallest scale factor which
+                // indicates biggest change needed to keep the tree inside the canvas
+                let scaleIncrement = Math.min(leftScale, rightScale, topScale, bottomScale, 1);
+
+                // Draw the root
+                ctx.save()
+                ctx.scale(totalScale * scaleIncrement, totalScale * scaleIncrement);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, rootHeight * height + rootBuffer);
+                ctx.stroke();
+                ctx.restore()
+
+                // Children need to only scale by the difference in scale from the previous iteration
+                // Scaling by the full scale value causes the scaling to compound each iteration
+                ctx.save();
+                ctx.scale(scaleIncrement, scaleIncrement);
+
+                // Draw first child (change the position the image is drawn to match the full scale factor, even though
+                // the children themselves are only scaled by the increment)
+                draw_tranformed_image(ctx, back_canvas, 0, rootHeight * height * totalScale, ang1, scale1)
+                // Draw second child
+                draw_tranformed_image(ctx, back_canvas, 0, rootHeight * height * totalScale, ang2, scale2)
+                ctx.restore()
+
+                totalScale *= scaleIncrement;
+
+                // Set a timeout to free some cycles for the main thread, but let a few iterations finish first so things look smooth
+                if (i > 5) {
+                    await new Promise(r => setTimeout(r, 20));
+
+                    // Check if this thread needs to exit
+                    // If a new render task has been started, exit
+                    if (latestRender !== renderInd) {
+                        break;
+                    }
                 }
             }
+            ctx.restore();
+        } finally {
+            renderRunning = 0;
         }
-        ctx.restore();
-        renderRunning = 0;
     }
 
     // Redraw if any parameters update
