@@ -25,8 +25,8 @@
 
 <span class="container">
     <fieldset class="inner-container">
+        <legend>{label}</legend>
         <div class="inner-container">
-            <legend>{label}</legend>
             <input class="slider" aria-label="{label} slider" type="range" bind:value={value} min="{min}" max="{max}" step="{step}"/>
             <input class="display" aria-label="{label} display" type="number" bind:value={value} min="{min}" max="{max}" step="{step}" />
         </div>

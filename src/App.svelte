@@ -27,10 +27,6 @@
     }
 </style>
 
-
-<!-- 
-<Tree {ang1} {ang2} {scale1} {scale2} />
--->
 <div class="container">
     <div class="canvas-container">
         <CanvasTree {ang1} {ang2} {scale1} {scale2} />
@@ -38,12 +34,12 @@
     <div class="controls-container">
         <div class="slider-container">
             <DisplaySlider label="Angle 1" bind:value={ang1} min="-180" max="180" step="5"/>
-            <DisplaySlider label="Scale 1" bind:value={scale1} min="0" max="0.9" step="0.02"/>
+            <DisplaySlider label="Scale 1" bind:value={scale1} min="0" max="1" step="0.02"/>
         </div>
 
         <div class="slider-container">
             <DisplaySlider label="Angle 2" bind:value={ang2} min="-180" max="180" step="5"/>
-            <DisplaySlider label="Scale 2" bind:value={scale2} min="0" max="0.9" step="0.02"/>
+            <DisplaySlider label="Scale 2" bind:value={scale2} min="0" max="1" step="0.02"/>
         </div>
     </div>
 </div>

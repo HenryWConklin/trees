@@ -17,7 +17,7 @@
     const rootHeight = 0.2;
     const rootMargin = 0.3;
 
-    function draw_tranformed_image(ctx, img, x, y, angle, scale) {
+    function draw_transformed_image(ctx, img, x, y, angle, scale) {
         ctx.save();
         // This reflection is necessary to get the image in the right orientation, shows up mirrored in weird ways
         // otherwise
@@ -224,9 +224,9 @@
 
                 // Draw first child (change the position the image is drawn to match the full scale factor, even though
                 // the children themselves are only scaled by the increment)
-                draw_tranformed_image(ctx, back_canvas, 0, rootHeight * height * totalScale, ang1, scale1)
+                draw_transformed_image(ctx, back_canvas, 0, rootHeight * height * totalScale, ang1, scale1)
                 // Draw second child
-                draw_tranformed_image(ctx, back_canvas, 0, rootHeight * height * totalScale, ang2, scale2)
+                draw_transformed_image(ctx, back_canvas, 0, rootHeight * height * totalScale, ang2, scale2)
                 ctx.restore()
 
                 totalScale *= scaleIncrement;
